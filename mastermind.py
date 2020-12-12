@@ -1,4 +1,6 @@
 from multiprocessing import Process
+from itertools import product
+
 def scorer(s, guess, pegs):
     out = []
     for i in range(len(s)):
@@ -15,35 +17,39 @@ def scorer(s, guess, pegs):
         # Generates list
         if score != pegs:
             out.append(s[i])
-
-        return out
+    return out
 
 def minimax(s, pegs):
     min = []
-    for i in range(1111,6667):
+    for i in range(len(s)):
         # Calculates minimum no. possiblities removed
-        eliminate = 1297
+        eliminate = 1296
         for j in range(len(s)):
             for k in range(len(pegs)):
                 score = len(scorer(s, str(i), pegs[k]))
-                if score < eliminate:
+                if score < eliminate and score > 30:
                     eliminate = score
-        min.append([str(i),eliminate])
+        min.append([str(s[i]), eliminate])
 
     guess = ""
     max = 0
     # Finds the max of the min
     for i in range(len(min)):
-        score = len(s) - min[i][1]
-        if score > max:
+        current = len(s) - min[i][1]
+        if current > max:
             guess = min[i][0]
+            max = current
     return guess
 
 def guess(response):
     # Generate possiblities
     s = []
-    for i in range(1111,6667):
-        s.append(str(i))
+    tuples = list(product(["1", "2", "3", "4", "5", "6"], repeat=4))
+    for i in range(len(tuples)):
+        tmp = []
+        for j in range(len(tuples[i])):
+            tmp.append(tuples[i][j])
+        s.append(tmp)
 
     # Generate peg combos
     pegs = []
@@ -51,13 +57,13 @@ def guess(response):
         for line in file:
             line = line.replace('\n', '')
             pegs.append([line])
-    print(pegs)
 
     # Formatting input from string to list
     sliced = []
     for char in response:
         sliced.append(char.upper())
 
+    # Win clause
     if sliced == ["B","B","B","B"]:
         return 0
 
@@ -65,8 +71,12 @@ def guess(response):
     remove = scorer(s, "1122", sliced)
     for i in range(len(remove)):
         s.remove(remove[i])
-
-    print(minimax(s, pegs), "is my next guess.")
-
-response = input("My guess is 1122, what's your response: ")
-guess(response)
+    print(len(s))
+    next_guess = minimax(s, pegs)
+    print(next_guess, "is my next guess.")
+    s.remove(next_guess)
+    
+print("My first guess is 1122")
+for i in range(6):
+    response = input("What's your response: ")
+    guess(response)
