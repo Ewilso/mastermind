@@ -7,11 +7,15 @@ def scorer(s, guess, pegs):
         score = []
         for j in range(len(guess)):
             # Checks for right in right place
+            #print(guess[j], s[i][j])
             if guess[j] == s[i][j]:
                 score.append("B")
             else:
                 # Otherwise checks for right in the wrong place. Only does the rest of the string to avoid duplication
-                for k in range(j, len(guess)):
+                for k in range(j + 1,len(guess)):
+                    if guess[k] == s[i][j]:
+                        score.append("W")
+                for k in range(j - 1):
                     if guess[k] == s[i][j]:
                         score.append("W")
         # Generates list
@@ -23,13 +27,13 @@ def minimax(s, pegs):
     min = []
     for i in range(len(s)):
         # Calculates minimum no. possiblities removed
-        eliminate = 1296
+        eliminate = 0
         for j in range(len(s)):
             for k in range(len(pegs)):
-                score = len(scorer(s, str(i), pegs[k]))
-                if score < eliminate and eliminate > 30:
+                score = len(scorer(s, s[i], pegs[k]))
+                if score < eliminate:
                     eliminate = score
-        min.append([str(s[i]), eliminate])
+        min.append([s[i], eliminate])
 
     guess = ""
     max = 0
@@ -41,7 +45,7 @@ def minimax(s, pegs):
             max = current
     return guess
 
-def guess(response, s, pegs):
+def guess(response, s, pegs, new_guess):
     # Formatting input from string to list
     sliced = []
     for char in response:
@@ -52,11 +56,10 @@ def guess(response, s, pegs):
         return 0
 
     # Gets rid of bad choices
-    remove = scorer(s, "1122", sliced)
+    remove = scorer(s, new_guess, sliced)
     for i in range(len(remove)):
         s.remove(remove[i])
     print(len(s))
-    print(minimax(s, pegs), "is my next guess.")
 
 # Generate possiblities
 s = []
@@ -71,7 +74,11 @@ with open('pegs') as file:
         line = line.replace('\n', '')
         pegs.append([line])
 
-print("My first guess is 1122")
+new_guess = ["1","1","2","2"]
+print("My first guess is", new_guess)
 for i in range(6):
     response = input("What's your response: ")
-    guess(response, s, pegs)
+    print(new_guess)
+    guess(response, s, pegs, new_guess)
+    new_guess = minimax(s, pegs)
+    print(new_guess, "is my next guess.")
