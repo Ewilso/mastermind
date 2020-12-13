@@ -1,5 +1,6 @@
-from multiprocessing import Process
 from itertools import product
+import sys
+import threading
 
 def scorer(s, guess, pegs):
     out = []
@@ -23,8 +24,7 @@ def scorer(s, guess, pegs):
             out.append(s[i])
     return out
 
-def minimax(s, pegs):
-    min = []
+def mulitloop(s, pegs, min):
     for i in range(len(s)):
         # Calculates minimum no. possiblities removed
         eliminate = 0
@@ -35,6 +35,18 @@ def minimax(s, pegs):
                     eliminate = score
         min.append([s[i], eliminate])
 
+def minimax(s, pegs):
+    jobs = []
+    min = []
+    thread = threading.Thread(target=mulitloop(s,pegs,min))
+    jobs.append(thread)
+
+    for j in jobs:
+        j.start()
+
+    # Ensure all of the threads have finished
+    for j in jobs:
+        j.join()
     guess = ""
     max = 0
     # Finds the max of the min
@@ -53,7 +65,7 @@ def guess(response, s, pegs, new_guess):
 
     # Win clause
     if sliced == ["B","B","B","B"]:
-        return 0
+        sys.exit()
 
     # Gets rid of bad choices
     remove = scorer(s, new_guess, sliced)
@@ -78,7 +90,6 @@ new_guess = ["1","1","2","2"]
 print("My first guess is", new_guess)
 for i in range(6):
     response = input("What's your response: ")
-    print(new_guess)
     guess(response, s, pegs, new_guess)
     new_guess = minimax(s, pegs)
     print(new_guess, "is my next guess.")
