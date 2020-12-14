@@ -2,7 +2,7 @@ from itertools import product
 import sys
 import threading
 
-def scorer(s, guess, pegs):
+def scorer(guess, response):
     out = []
     for i in range(len(s)):
         score = []
@@ -20,44 +20,45 @@ def scorer(s, guess, pegs):
                     if guess[k] == s[i][j]:
                         score.append("W")
         # Generates list
-        if score != pegs:
+        if score != response:
             out.append(s[i])
+#        else:
+#            print(guess, s[i], score)
     return out
 
-def mulitloop(s, pegs, min):
+def mulitloop(min):
     for i in range(len(s)):
         # Calculates minimum no. possiblities removed
         eliminate = 0
-        for j in range(len(s)):
-            for k in range(len(pegs)):
-                score = len(scorer(s, s[i], pegs[k]))
-                if score < eliminate:
-                    eliminate = score
+        for k in range(len(pegs)):
+            score = len(scorer(s[i], pegs[k]))
+            if score < eliminate:
+                eliminate = score
         min.append([s[i], eliminate])
 
-def minimax(s, pegs):
+def minimax():
     jobs = []
     min = []
-    thread = threading.Thread(target=mulitloop(s,pegs,min))
+    thread = threading.Thread(target=mulitloop(min))
     jobs.append(thread)
 
     for j in jobs:
         j.start()
-
     # Ensure all of the threads have finished
     for j in jobs:
         j.join()
+
     guess = ""
     max = 0
     # Finds the max of the min
-    for i in range(len(min) - 1, -1, -1):
+    for i in range(len(min)):
         current = len(s) - min[i][1]
         if current > max:
             guess = min[i][0]
             max = current
     return guess
 
-def guess(response, s, pegs, new_guess):
+def guess(response, new_guess):
     # Formatting input from string to list
     sliced = []
     for char in response:
@@ -68,18 +69,23 @@ def guess(response, s, pegs, new_guess):
         sys.exit()
 
     # Gets rid of bad choices
-    remove = scorer(s, new_guess, sliced)
+    remove = scorer(new_guess, sliced)
     for i in range(len(remove)):
         s.remove(remove[i])
+    if len(s) == 0:
+        print("Program Terminated")
+        sys.exit()
     print(len(s))
 
 # Generate possiblities
+global s
 s = []
 tuples = product(["1", "2", "3", "4", "5", "6"], repeat=4)
 for i in tuples:
     s.append(list(i))
 
 # Generate peg combos
+global pegs
 pegs = []
 with open('pegs') as file:
     for line in file:
@@ -90,6 +96,6 @@ new_guess = ["1","1","2","2"]
 print("My first guess is", new_guess)
 for i in range(6):
     response = input("What's your response: ")
-    guess(response, s, pegs, new_guess)
-    new_guess = minimax(s, pegs)
+    guess(response, new_guess)
+    new_guess = minimax()
     print(new_guess, "is my next guess.")
