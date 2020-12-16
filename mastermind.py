@@ -2,17 +2,17 @@ from itertools import product
 import sys
 import threading
 
+# TODO: Rework scoring function
 def scorer(guess, response):
     out = []
     for i in range(len(s)):
         score = []
         for j in range(len(guess)):
             # Checks for right in right place
-            #print(guess[j], s[i][j])
             if guess[j] == s[i][j]:
                 score.append("B")
             else:
-                # Otherwise checks for right in the wrong place. Only does the rest of the string to avoid duplication
+                # Otherwise checks for right in the wrong place
                 for k in range(j + 1,len(guess)):
                     if guess[k] == s[i][j]:
                         score.append("W")
@@ -22,11 +22,10 @@ def scorer(guess, response):
         # Generates list
         if score != response:
             out.append(s[i])
-#        else:
-#            print(guess, s[i], score)
     return out
 
-def mulitloop(min):
+def minimax():
+    min = []
     for i in range(len(s)):
         # Calculates minimum no. possiblities removed
         eliminate = 0
@@ -35,18 +34,6 @@ def mulitloop(min):
             if score < eliminate:
                 eliminate = score
         min.append([s[i], eliminate])
-
-def minimax():
-    jobs = []
-    min = []
-    thread = threading.Thread(target=mulitloop(min))
-    jobs.append(thread)
-
-    for j in jobs:
-        j.start()
-    # Ensure all of the threads have finished
-    for j in jobs:
-        j.join()
 
     guess = ""
     max = 0
@@ -73,7 +60,7 @@ def guess(response, new_guess):
     for i in range(len(remove)):
         s.remove(remove[i])
     if len(s) == 0:
-        print("Program Terminated")
+        print("Program Terminated. No remaining combinations.")
         sys.exit()
     print(len(s))
 
@@ -94,7 +81,7 @@ with open('pegs') as file:
 
 new_guess = ["1","1","2","2"]
 print("My first guess is", new_guess)
-for i in range(6):
+for i in range(10):
     response = input("What's your response: ")
     guess(response, new_guess)
     new_guess = minimax()
