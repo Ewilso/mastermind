@@ -11,16 +11,18 @@ def scorer(guess, response):
             # Checks for right in right place
             if guess[j] == s[i][j]:
                 score.append("B")
-            else:
-                # Otherwise checks for right in the wrong place
-                for k in range(j + 1,len(guess)):
-                    if guess[k] == s[i][j]:
-                        score.append("W")
-                for k in range(j - 1):
-                    if guess[k] == s[i][j]:
-                        score.append("W")
+
+        for j in range(len(guess)):
+            # Otherwise checks for right in the wrong place
+            for k in range(j + 1,len(guess)):
+                if guess[k] == s[i][j] and len(score) < 4:
+                    score.append("W")
+            for k in range(j - 1):
+                if guess[k] == s[i][j] and len(score) < 4:
+                    score.append("W")
         # Generates list
         if score != response:
+            print(guess, score, s[i])
             out.append(s[i])
     return out
 
@@ -50,7 +52,7 @@ def guess(response, new_guess):
     sliced = []
     for char in response:
         sliced.append(char.upper())
-
+    sliced.sort()
     # Win clause
     if sliced == ["B","B","B","B"]:
         sys.exit()
@@ -59,17 +61,7 @@ def guess(response, new_guess):
     remove = scorer(new_guess, sliced)
     for i in range(len(remove)):
         s.remove(remove[i])
-    if len(s) == 0:
-        print("Program Terminated. No remaining combinations.")
-        sys.exit()
     print(len(s))
-
-# Generate possiblities
-global s
-s = []
-tuples = product(["1", "2", "3", "4", "5", "6"], repeat=4)
-for i in tuples:
-    s.append(list(i))
 
 # Generate peg combos
 global pegs
@@ -82,6 +74,12 @@ with open('pegs') as file:
 new_guess = ["1","1","2","2"]
 print("My first guess is", new_guess)
 for i in range(10):
+    global s
+    s = []
+    tuples = product(["1", "2", "3", "4", "5", "6"], repeat=4)
+    for i in tuples:
+        s.append(list(i))
+    print(len(s))
     response = input("What's your response: ")
     guess(response, new_guess)
     new_guess = minimax()
