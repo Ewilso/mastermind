@@ -46,22 +46,21 @@ def guess(response, new_guess):
     remove = scorer(new_guess, response)
     for i in range(len(remove)):
         s.remove(remove[i])
-    print(len(s))
 
 # Genberate guess combos
 global s
 s = []
-tuples = itertools.product(["1", "2", "3", "4", "5", "6"], repeat=4)
+tuples = itertools.product(["1", "2", "3", "4", "5", "6", "7", "8"], repeat=4)
 for i in tuples:
     s.append(list(i))
 
 # Generate peg combos
 global pegs
-pegs = []
-with open('pegs') as file:
-    for line in file:
-        line = line.replace('\n', '')
-        pegs.append(line)
+pegs = ["","B","W","BB","BW","WW","BBB","BBW","BWW","WWW","BBBB","BBBW","BBWW","BWWW","WWWW"]
+
+print("Welcome to Mastermind! Think of a four digit combination made of numbers\
+between 1-8 (e.g 1486).\nRespond to the inputs with mastermind peg combinations\
+and watch as the algorithm guesses your number")
 
 new_guess = ["1","1","2","2"]
 print("My first guess is", new_guess)
